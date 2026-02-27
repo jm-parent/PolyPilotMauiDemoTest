@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:l="clr-namespace:PolyPilotMauiDemoTest.Localization"
+             xmlns:vm="clr-namespace:PolyPilotMauiDemoTest.ViewModels"
+             x:Class="PolyPilotMauiDemoTest.SettingsPage"
+             Title="{l:Translate Settings_Title}">
+
+    <ContentPage.BindingContext>
+        <vm:SettingsViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,16" Spacing="8">
+
+            <!-- Theme Section -->
+            <Label Text="{l:Translate Settings_ThemeSection}"
+                   Style="{StaticResource SubHeadline}"
+                   FontSize="18"
+                   Margin="0,8,0,4" />
+
+            <Picker ItemsSource="{Binding ThemeOptions}"
+                    SelectedIndex="{Binding SelectedThemeIndex}"
+                    HorizontalOptions="Fill" />
+
+            <!-- Language Section -->
+            <Label Text="{l:Translate Settings_LanguageSection}"
+                   Style="{StaticResource SubHeadline}"
+                   FontSize="18"
+                   Margin="0,16,0,4" />
+
+            <Picker ItemsSource="{Binding LanguageOptions}"
+                    SelectedIndex="{Binding SelectedLanguageIndex}"
+                    HorizontalOptions="Fill" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

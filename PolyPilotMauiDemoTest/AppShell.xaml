@@ -6,6 +6,13 @@
     xmlns:local="clr-namespace:PolyPilotMauiDemoTest"
     Title="PolyPilotMauiDemoTest">
 
+    <Shell.ToolbarItems>
+        <ToolbarItem Text="⚙"
+                     Order="Primary"
+                     Priority="0"
+                     Clicked="OnSettingsClicked" />
+    </Shell.ToolbarItems>
+
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
