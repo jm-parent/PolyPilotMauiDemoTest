@@ -15,6 +15,8 @@ namespace PolyPilotMauiDemoTest
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddTransient<SettingsPage>();
+
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
