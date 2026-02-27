@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+#if DEBUG
+using MauiDevFlow.Agent;
+#endif
 
 namespace PolyPilotMauiDemoTest
 {
@@ -19,6 +22,10 @@ namespace PolyPilotMauiDemoTest
 
 #if DEBUG
     		builder.Logging.AddDebug();
+        builder.AddMauiDevFlowAgent(options =>
+        {
+            options.Port = 9223;
+        });
 #endif
 
             return builder.Build();
