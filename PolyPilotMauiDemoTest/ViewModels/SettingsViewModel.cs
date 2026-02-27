@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -12,7 +13,7 @@ public class SettingsViewModel : INotifyPropertyChanged
 
     private int _selectedThemeIndex;
     private int _selectedLanguageIndex;
-    private List<string> _themeOptions = [];
+    private bool _isSubscribed;
 
     public SettingsViewModel()
     {
@@ -20,23 +21,17 @@ public class SettingsViewModel : INotifyPropertyChanged
         var savedLang = Preferences.Default.Get(LanguagePreferenceKey, "en");
         _selectedLanguageIndex = savedLang == "fr" ? 1 : 0;
 
-        RefreshThemeOptions();
-
-        // Refresh the localized theme option labels whenever the culture changes.
-        LocalizationManager.Instance.PropertyChanged += (_, _) =>
-        {
-            RefreshThemeOptions();
-        };
+        // Populate the collection once; subsequent updates are done in-place.
+        foreach (var item in BuildThemeItems())
+            ThemeOptions.Add(item);
     }
 
-    public List<string> ThemeOptions
-    {
-        get => _themeOptions;
-        private set { _themeOptions = value; OnPropertyChanged(); }
-    }
+    // ObservableCollection kept as a stable reference — items are updated in-place
+    // so the Picker never sees a new ItemsSource and never resets SelectedIndex.
+    public ObservableCollection<string> ThemeOptions { get; } = new();
 
     /// <summary>
-    /// Language options. Names are intentionally shown in their own language (not translated).
+    /// Language options. Names are shown in their own language (not translated).
     /// </summary>
     public List<string> LanguageOptions { get; } = ["English", "Français"];
 
@@ -64,18 +59,47 @@ public class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-    private void RefreshThemeOptions()
+    /// <summary>Called by the page in OnAppearing to begin listening for locale changes.</summary>
+    public void Subscribe()
     {
-        ThemeOptions =
-        [
-            LocalizationManager.Instance["Settings_Theme_Light"],
-            LocalizationManager.Instance["Settings_Theme_Dark"],
-            LocalizationManager.Instance["Settings_Theme_System"]
-        ];
+        if (_isSubscribed) return;
+        LocalizationManager.Instance.PropertyChanged += OnLocalizationChanged;
+        _isSubscribed = true;
     }
+
+    /// <summary>Called by the page in OnDisappearing to stop listening — prevents memory leaks.</summary>
+    public void Unsubscribe()
+    {
+        if (!_isSubscribed) return;
+        LocalizationManager.Instance.PropertyChanged -= OnLocalizationChanged;
+        _isSubscribed = false;
+    }
+
+    // Named handler so it can be unsubscribed precisely.
+    private void OnLocalizationChanged(object? sender, PropertyChangedEventArgs e)
+        => RefreshThemeOptionsInPlace();
+
+    private void RefreshThemeOptionsInPlace()
+    {
+        var items = BuildThemeItems();
+        // Update each item in-place: ObservableCollection fires Replace notifications
+        // which lets the Picker update its displayed text without resetting SelectedIndex.
+        for (int i = 0; i < items.Length; i++)
+            ThemeOptions[i] = items[i];
+    }
+
+    private static string[] BuildThemeItems() =>
+    [
+        LocalizationManager.Instance["Settings_Theme_Light"],
+        LocalizationManager.Instance["Settings_Theme_Dark"],
+        LocalizationManager.Instance["Settings_Theme_System"]
+    ];
 
     private static void ApplyTheme(int index)
     {
+        // Guard: only valid indices produce a meaningful theme.
+        if (index < 0) return;
+
         var theme = index switch
         {
             0 => AppTheme.Light,
