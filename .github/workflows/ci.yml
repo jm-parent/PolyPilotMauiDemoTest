@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Android — ubuntu-latest
+  # ─────────────────────────────────────────────
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Restore
+        run: dotnet restore PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-android
+
+      - name: Build Android (Debug)
+        run: dotnet build PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-android -c Debug --no-restore
+
+  # ─────────────────────────────────────────────
+  # iOS — macos-latest
+  # ─────────────────────────────────────────────
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Install MAUI iOS workload
+        run: dotnet workload install maui-ios
+
+      - name: Restore
+        run: dotnet restore PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-ios
+
+      - name: Build iOS (Simulator, no signing)
+        run: >
+          dotnet build PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj
+          -f net10.0-ios
+          -c Debug
+          --no-restore
+          /p:BuildForDevice=false
+
+  # ─────────────────────────────────────────────
+  # macOS Catalyst — macos-latest
+  # ─────────────────────────────────────────────
+  build-maccatalyst:
+    name: Build macOS Catalyst
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Install MAUI macOS workload
+        run: dotnet workload install maui-maccatalyst
+
+      - name: Restore
+        run: dotnet restore PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-maccatalyst
+
+      - name: Build macOS Catalyst (Debug)
+        run: dotnet build PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-maccatalyst -c Debug --no-restore
+
+  # ─────────────────────────────────────────────
+  # Windows — windows-latest
+  # ─────────────────────────────────────────────
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Install MAUI Windows workload
+        run: dotnet workload install maui-windows
+
+      - name: Restore
+        run: dotnet restore PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-windows10.0.19041.0
+
+      - name: Build Windows (Debug)
+        run: dotnet build PolyPilotMauiDemoTest/PolyPilotMauiDemoTest.csproj -f net10.0-windows10.0.19041.0 -c Debug --no-restore
