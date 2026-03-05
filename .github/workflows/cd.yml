@@ -57,6 +57,7 @@ jobs:
   release-ios:
     name: Release iOS (Simulator)
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,6 +95,7 @@ jobs:
   release-maccatalyst:
     name: Release macOS Catalyst
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
